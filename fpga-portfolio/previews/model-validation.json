@@ -1,0 +1,13 @@
+{
+  "file": "public/models/nexys4-ddr.glb",
+  "bytes": 1950196,
+  "triangles": 49920,
+  "meshes": 123,
+  "materials": 14,
+  "independent_switches": 16,
+  "independent_buttons": 7,
+  "independent_user_leds": 16,
+  "independent_segments_including_decimal_points": 64,
+  "embedded_images": 3,
+  "all_control_names_verified": true
+}
