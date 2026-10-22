@@ -1,8 +1,8 @@
 # Rigved Koli
 
-Final-year B.Tech Electrical Engineering student at IIT Kanpur (CPI 9.1/10).
+Final-year EE student at IIT Kanpur (CPI 9.1/10).
 
-**Contact:** [GitHub](https://github.com/kolirigved) · [LinkedIn](https://www.linkedin.com/in/rigved-koli-58080329b/) · brigved23@iitk.ac.in
+**Contact:** [GitHub](https://github.com/kolirigved) · [LinkedIn](https://www.linkedin.com/in/rigved-koli-58080329b/) · rigvedkoli24@gmail.com
 
 ## Experience
 

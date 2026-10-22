@@ -17,7 +17,7 @@ function controlFor(object: Object3D): Object3D | null {
 }
 function label(object: Object3D) {
   const match = object.name.match(/^SW(\d+)_Slider$/);
-  if (match) { const i = Number(match[1]); return i === 16 ? 'SW16 · Main power' : i < 8 ? `SW${i} · ${modules[i]}` : `SW${i} · Input bit ${i}`; }
+  if (match) { const i = Number(match[1]); return i === 16 ? 'SW16 · Main power' : i < modules.length ? `SW${i} · ${modules[i]}` : `SW${i} · Input bit ${i}`; }
   return buttonLabels[object.name.replace('_Plunger', '') as BoardButton] ?? object.name;
 }
 function addOledContacts() {

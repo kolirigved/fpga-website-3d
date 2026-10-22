@@ -1,12 +1,12 @@
-export const modules = ['Projects', 'Experience', 'Research', 'About', 'Skills', 'Contact', 'Lab', 'Diagnostics'] as const;
+export const modules = ['Projects', 'Experience', 'Research', 'About', 'Skills', 'Contact', 'Lab'] as const;
 export type Module = typeof modules[number] | 'Home';
 export const profile = {
-  name: 'Rigved Koli', education: 'B.Tech Electrical Engineering · IIT Kanpur · CPI 9.1/10',
-  description: 'Final-year electrical engineering student building reliable systems across software, machine learning, RF, FPGA, and interactive tools.',
+  name: 'Rigved Koli', education: 'EE student at IIT Kanpur · CPI 9.1/10',
+  description: 'EE student at IIT Kanpur building reliable systems across software, machine learning, RF, FPGA, and interactive tools.',
   links: {
     github: 'https://github.com/kolirigved',
     resume: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/Rigved-Koli-Resume.md`,
-    email: 'mailto:brigved23@iitk.ac.in',
+    email: 'mailto:rigvedkoli24@gmail.com',
     linkedin: 'https://www.linkedin.com/in/rigved-koli-58080329b/',
   },
 };
@@ -20,14 +20,13 @@ export const projects = [
 export function summary(module: Module, item: number) {
   if (module === 'Projects') return { title: projects[item % projects.length].title, subtitle: projects[item % projects.length].subtitle, detail: projects[item % projects.length].technologies.slice(0, 3).join(' · ') };
   const content: Record<Exclude<Module, 'Projects'>, { title: string; subtitle: string; detail: string }> = {
-    Home: { title: 'Rigved Koli', subtitle: 'Electrical engineer · IIT Kanpur', detail: 'SELECT A MODULE TO EXPLORE' },
+    Home: { title: 'Rigved Koli', subtitle: 'EE student at IIT Kanpur', detail: 'SELECT A MODULE TO EXPLORE' },
     Experience: { title: 'Google India', subtitle: 'Cloud Compute & Infrastructure · SWE Intern', detail: 'OBSERVABILITY · SLOS · AI DIAGNOSTICS' },
     Research: { title: '6G positioning', subtitle: 'Hybrid CNN–Transformer direction finding', detail: '5.86° RMSE · WIRELESS · ML' },
     About: { title: 'Across disciplines.', subtitle: 'B.Tech EE · IIT Kanpur · CPI 9.1/10', detail: 'SOFTWARE · ML · RF · FPGA' },
     Skills: { title: 'A connected toolkit.', subtitle: 'C/C++ · Python · TypeScript · Verilog', detail: 'FASTAPI · FLUTTER · PYTORCH · MPI' },
-    Contact: { title: 'Rigved Koli', subtitle: 'brigved23@iitk.ac.in', detail: 'GITHUB · LINKEDIN · RESUME' },
+    Contact: { title: 'Rigved Koli', subtitle: 'rigvedkoli24@gmail.com', detail: 'GITHUB · LINKEDIN · RESUME' },
     Lab: { title: 'RF predistortion', subtitle: 'Gate-bias compensation for carrier trapping', detail: 'SIMULINK · VERILOG · FPGA' },
-    Diagnostics: { title: 'RBK-FPGA', subtitle: 'Personal development system · Rev 01', detail: '16 TOP GRADES · 1400 CF · READY' },
   };
   return content[module];
 }

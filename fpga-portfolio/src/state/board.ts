@@ -26,13 +26,13 @@ export const useBoard = create<State>((set, get) => ({
   zoomOut: () => set(s => ({ zoomTrigger: s.zoomTrigger - 1 })),
   select: module => {
     const switches = [...get().switches];
-    for (let i = 0; i < 8; i++) switches[i] = modules[i] === module;
+    for (let i = 0; i < modules.length; i++) switches[i] = modules[i] === module;
     set({ module, switches, item: 0, activityUntil: Date.now() + 180 });
   },
   toggleSwitch: index => {
     if (index < 0 || index > 15 || !Number.isInteger(index)) return;
     const s = get();
-    if (index < 8) s.select(s.switches[index] ? 'Home' : modules[index]);
+    if (index < modules.length) s.select(s.switches[index] ? 'Home' : modules[index]);
     else { const switches = [...s.switches]; switches[index] = !switches[index]; set({ switches, activityUntil: Date.now() + 180 }); }
   },
   step: delta => { const s = get(); if (s.module === 'Projects') set({ item: (s.item + delta % projects.length + projects.length) % projects.length, activityUntil: Date.now() + 180 }); else s.cycleModule(delta); },
