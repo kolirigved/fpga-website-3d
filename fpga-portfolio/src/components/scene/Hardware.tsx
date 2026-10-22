@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
-import { Box3, CanvasTexture, Color, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3 } from 'three';
+import { Box3, BoxGeometry, CanvasTexture, Color, CylinderGeometry, Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, SRGBColorSpace, Vector3 } from 'three';
 import { modules, summary } from '@/data/portfolio';
 import { useBoard, readout, SEGMENTS, type BoardButton } from '@/state/board';
 
@@ -20,6 +20,40 @@ function label(object: Object3D) {
   if (match) { const i = Number(match[1]); return i === 16 ? 'SW16 · Main power' : i < 8 ? `SW${i} · ${modules[i]}` : `SW${i} · Input bit ${i}`; }
   return buttonLabels[object.name.replace('_Plunger', '') as BoardButton] ?? object.name;
 }
+const boardScale = 12.2 / 1473;
+
+function addCircuitDetail() {
+  const detail = new Group(); detail.name = 'Runtime_circuit_detail';
+  const epoxy = new MeshStandardMaterial({ color: '#171b1d', roughness: .78 });
+  const ceramic = new MeshStandardMaterial({ color: '#77705c', roughness: .72 });
+  const resistor = new MeshStandardMaterial({ color: '#241f1a', roughness: .72 });
+  const ferrite = new MeshStandardMaterial({ color: '#293333', metalness: .12, roughness: .48 });
+  const gold = new MeshStandardMaterial({ color: '#b77b24', metalness: .72, roughness: .31 });
+  const addBox = (x: number, y: number, width: number, height: number, depth: number, material: MeshStandardMaterial, name: string) => {
+    const mesh = new Mesh(new BoxGeometry(width * boardScale, depth, height * boardScale), material);
+    mesh.name = name; mesh.position.set((x - 818.5) * boardScale, .16 + depth / 2, (y - 802.5) * boardScale);
+    mesh.castShadow = true; mesh.receiveShadow = true; detail.add(mesh);
+  };
+  for (const [name, x, y] of [['VCCINT', 500, 497], ['VCCAUX', 1088, 550], ['VCCO', 1350, 578]] as const) addBox(x, y, 54, 46, .11, epoxy, `${name}_regulator`);
+  for (const [x, y, width, height] of [[428, 498, 38, 34], [1016, 550, 32, 28], [1274, 578, 32, 28]] as const) addBox(x, y, width, height, .13, ferrite, 'Ferrite_inductor');
+  for (const x of [469, 490, 511, 532, 553, 574, 595, 616]) {
+    addBox(x, 464, 6, 17, .035, resistor, 'Termination_resistor');
+    addBox(x, 534, 6, 17, .035, resistor, 'Termination_resistor');
+  }
+  for (const [x, y] of [[407,470],[407,494],[407,518],[592,470],[592,494],[592,518],[997,520],[997,544],[997,568],[1179,538],[1179,562],[1179,586],[1305,545],[1305,569],[1305,593]] as const) addBox(x, y, 7, 15, .048, ceramic, 'Decoupling_MLCC');
+  for (const [x, y] of [[635,620],[980,620],[650,1110],[970,1110]] as const) {
+    for (let row = 0; row < 4; row += 1) for (let col = 0; col < 4; col += 1) {
+      const via = new Mesh(new CylinderGeometry(.026, .026, .012, 12), gold);
+      via.name = 'Signal_via'; via.position.set((x + col * 11 - 818.5) * boardScale, .166, (y + row * 11 - 802.5) * boardScale); detail.add(via);
+    }
+  }
+  // Four visible contacts replace the original dense FPC visual on the live asset.
+  for (const z of [1.65, 1.32, .99, .66]) {
+    const pin = new Mesh(new BoxGeometry(.20, .052, .065), gold);
+    pin.name = 'OLED_4PIN_contact'; pin.position.set(6.115, .37, z); detail.add(pin);
+  }
+  return detail;
+}
 export default function Hardware({ onReady }: { onReady: (ready: boolean) => void }) {
   const gltf = useGLTF('/models/nexys4-ddr.glb');
   const hovered = useRef<string>('');
@@ -27,6 +61,18 @@ export default function Hardware({ onReady }: { onReady: (ready: boolean) => voi
   const fanSpeed = useRef(0);
   const board = useMemo(() => {
     const scene = gltf.scene.clone(true);
+    // The shipped GLB predates the latest OLED export. Apply the same enlarged
+    // JA/JB placement at runtime so the portfolio always reflects the model source.
+    const oldAnchor = new Vector3(9.1644945, .22, 0);
+    const newAnchor = new Vector3(9.613, .22, 1.155);
+    scene.traverse(o => {
+      if (o.name === 'OLED_SCREEN' || o.name.startsWith('Static_OLED_')) {
+        o.position.sub(oldAnchor).multiplyScalar(1.32).add(newAnchor);
+        o.scale.multiplyScalar(1.32);
+      }
+      if (o.name === 'Static_OLED_FPC_gold') o.visible = false;
+    });
+    const circuitDetail = addCircuitDetail(); scene.add(circuitDetail);
     const switches: { object: Object3D; index: number; rest: number; travel: number }[] = [];
     const buttons: { object: Object3D; key: BoardButton; rest: number }[] = [];
     const lights: { mesh: Mesh; name: string; material: MeshStandardMaterial }[] = [];
@@ -56,7 +102,7 @@ export default function Hardware({ onReady }: { onReady: (ready: boolean) => voi
         controlMaterials.push({ name: control.name, material: m });
       }
     });
-    return { scene, switches, buttons, lights, segments, oledMeshes, oledCanvas, oledTexture, controlMaterials, on, off };
+    return { scene, circuitDetail, switches, buttons, lights, segments, oledMeshes, oledCanvas, oledTexture, controlMaterials, on, off };
   }, [gltf.scene]);
   useEffect(() => {
     const screen = board.oledMeshes[0];
@@ -72,7 +118,7 @@ export default function Hardware({ onReady }: { onReady: (ready: boolean) => voi
       useBoard.getState().attachDisplay({ position: position.toArray() as [number, number, number], normal: normal.toArray() as [number, number, number], up: [0, 0, -1], width: width || 4.09, height: height || 2.25 });
     }
     onReady(true);
-    return () => { useBoard.getState().attachDisplay(null); board.on.dispose(); board.off.dispose(); board.oledTexture.dispose(); board.oledMeshes.forEach(m => (m.material as MeshBasicMaterial).dispose()); board.lights.forEach(l => l.material.dispose()); board.controlMaterials.forEach(m => m.material.dispose()); };
+    return () => { useBoard.getState().attachDisplay(null); board.on.dispose(); board.off.dispose(); board.oledTexture.dispose(); board.oledMeshes.forEach(m => (m.material as MeshBasicMaterial).dispose()); board.lights.forEach(l => l.material.dispose()); board.controlMaterials.forEach(m => m.material.dispose()); board.circuitDetail.traverse(o => { if (o instanceof Mesh) { o.geometry.dispose(); (o.material as MeshStandardMaterial).dispose(); } }); };
   }, [board, onReady]);
   const green = useMemo(() => new Color('#84ba38'), []);
   const fanRotor = useMemo(() => board.scene.getObjectByName('CoolingFan_Rotor_Hub') ?? null, [board]);
