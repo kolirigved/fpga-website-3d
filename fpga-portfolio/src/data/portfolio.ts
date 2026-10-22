@@ -5,7 +5,7 @@ export const profile = {
   description: 'Final-year electrical engineering student building reliable systems across software, machine learning, RF, FPGA, and interactive tools.',
   links: {
     github: 'https://github.com/kolirigved',
-    resume: '/Rigved-Koli-Resume.md',
+    resume: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/Rigved-Koli-Resume.md`,
     email: 'mailto:brigved23@iitk.ac.in',
     linkedin: 'https://www.linkedin.com/in/rigved-koli-58080329b/',
   },

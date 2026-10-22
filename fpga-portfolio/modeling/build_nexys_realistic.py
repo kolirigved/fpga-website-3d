@@ -46,8 +46,6 @@ metal = material('Nickel_connector_shell', (.53,.57,.59), .82, .29)
 solder = material('Tin_solder', (.48,.51,.48), .78, .38)
 gold = material('Gold_contacts', (.61,.43,.13), .78, .28)
 ceramic = material('MLCC_ceramic', (.43,.39,.29), .05, .76)
-resistor_mat = material('Thick_film_resistor', (.075,.061,.046), .02, .72)
-ferrite_mat = material('Ferrite_inductor', (.055,.065,.06), .08, .54)
 blue = material('Jumper_blue', (.018,.09,.39), .05, .47)
 red = material('Reset_red_rubber', (.34,.035,.021), 0, .64)
 lens = material('Seven_segment_diffuser_off', (.16,.18,.16), .05, .5)
@@ -179,16 +177,6 @@ def passive(px,py,orient=0):
     box('Passive_ceramic',px,py,w,h,.048,.165,ceramic)
     for sign in (-1,1): box('Passive_terminal',px+sign*(w/2-1.7) if not orient else px,py if not orient else py+sign*(h/2-1.7),3.4 if not orient else w,h if not orient else 3.4,.055,.163,solder)
 
-def resistor(px, py, orient=0):
-    w,h=(17,6) if orient==0 else (6,17)
-    box('Thick_film_resistor',px,py,w,h,.035,.165,resistor_mat)
-    for sign in (-1,1):
-        box('Resistor_terminal',px+sign*(w/2-1.5) if not orient else px,py if not orient else py+sign*(h/2-1.5),3 if not orient else w,h if not orient else 3,.045,.163,solder)
-
-def ferrite_inductor(name, px, py, w=34, h=30):
-    box(name,px,py,w,h,.13,.16,ferrite_mat,.025)
-    for dx in (-w/2+5,w/2-5): box(name+'_pad',px+dx,py,7,h-8,.03,.16,solder)
-
 # Populate photographed decoupling banks and regulator islands, not random blocks.
 for row in range(4):
     for col in range(10): passive(699+col*29,650+row*18,1 if col>4 else 0)
@@ -203,36 +191,6 @@ for name,x,y,w,h in [('USB_controller',278,508,32,46),('Ethernet_PHY',645,305,30
 box('Clock_oscillator',233,521,39,31,.12,.16,metal)
 cylinder('MEMS_microphone',262,951,.092,.08,.16,gold)
 cylinder('Microphone_port',262,951,.024,.005,.241,plastic)
-
-# Dense but purposeful support circuitry: switching regulators, termination
-# arrays, clock filtering and test access make the personalised board read as
-# a populated engineering prototype without obscuring the physical controls.
-for i in range(8):
-    resistor(469 + i*21, 464, 1)
-    resistor(469 + i*21, 534, 1)
-for i in range(6):
-    resistor(1040 + i*19, 492)
-    passive(1040 + i*19, 521, 1)
-for px,py in [(436,420),(499,420),(562,420),(436,575),(499,575),(562,575)]: passive(px,py,1)
-for name,px,py in [('VCCINT_Regulator',500,497),('VCCAUX_Regulator',1088,550),('VCCO_Regulator',1350,578)]:
-    box(name,px,py,54,46,.11,.16,icmat,.018)
-    for row in (-1,1):
-        for col in range(4): box(name+'_lead',px-21+col*14,py+row*27,7,5,.035,.16,solder)
-ferrite_inductor('VCCINT_Ferrite',428,498,38,34)
-ferrite_inductor('VCCAUX_Ferrite',1016,550,32,28)
-ferrite_inductor('VCCO_Ferrite',1274,578,32,28)
-for x,y in [(407,470),(407,494),(407,518),(592,470),(592,494),(592,518),(997,520),(997,544),(997,568),(1179,538),(1179,562),(1179,586),(1305,545),(1305,569),(1305,593)]: passive(x,y)
-for x,y in [(670,561),(690,561),(710,561),(930,561),(950,561),(970,561),(710,1080),(730,1080),(750,1080),(870,1080),(890,1080),(910,1080)]: resistor(x,y)
-box('QSPI_flash_aux',1204,484,46,36,.08,.16,icmat,.015)
-for side in (-1,1):
-    for pin in range(4): box('QSPI_aux_pin',1204+side*28,484-12+pin*8,6,4,.03,.16,solder)
-box('Clock_filter',1010,428,46,24,.085,.16,metal,.01)
-for i in range(6): passive(960+i*20,428,1)
-for group_x,group_y in [(635,620),(980,620),(650,1110),(970,1110)]:
-    for row in range(4):
-        for col in range(4): ring('Signal_via',group_x+col*11,group_y+row*11,.026,.013,.164,gold,12)
-for i in range(10):
-    ring('Debug_test_pad',725+i*22,1170,.052,.027,.166,gold,16)
 
 # Sixteen independent slide switches, labeled SW15 at left through SW0 at right.
 for column in range(16):
