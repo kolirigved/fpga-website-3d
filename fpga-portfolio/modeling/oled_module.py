@@ -110,13 +110,15 @@ def create_oled_module(center=(0, 0, 0), scale=1.0, facing=0.0, yaw=0.0):
     screen = plane('OLED_SCREEN', 0, .02, .277, 3.27, 1.80, screen_material)
     screen['interface'] = 'JA Pmod SPI'; screen['display'] = 'portfolio'
 
-    # FPC/ZIF tail along the display's left edge. In the full scene this edge
-    # faces the FPGA so the connection reads like a short direct run.
-    box('OLED_FPC_ZIF_socket', -1.90, .02, .12, .28, 2.42, .14, black, .035)
-    box('OLED_FPC_latch', -1.90, .02, .205, .105, 2.34, .04, metal, .015)
-    for i in range(24):
-        y = -1.05 + i * .091
-        box(f'OLED_FPC_contact_{i:02d}', -2.12, y, .09, .23, .034, .012, gold)
+    # The interface is deliberately a compact four-pin I2C/SPI harness:
+    # power, ground and two signal lines.  It sits on the left edge, toward
+    # the FPGA, rather than suggesting an unnecessarily dense FPC tail.
+    box('OLED_FPC_ZIF_socket', -1.90, .02, .12, .30, .86, .14, black, .035)
+    box('OLED_FPC_latch', -1.90, .02, .205, .12, .76, .04, metal, .015)
+    for i, pin_name in enumerate(('VCC', 'GND', 'SCL', 'SDA')):
+        y = -.30 + i * .20
+        contact = box(f'OLED_4PIN_{pin_name}', -2.12, y, .09, .24, .075, .032, gold, .008)
+        contact['signal'] = pin_name
 
     # Visible controller, passives, and silk labels make the red carrier read
     # like the reference's populated display module rather than a bare panel.
@@ -133,5 +135,5 @@ def create_oled_module(center=(0, 0, 0), scale=1.0, facing=0.0, yaw=0.0):
         obj = bpy.context.object; objects.append(obj); return obj
     text_mesh('OLED_silkscreen_model', 'OLED 128x64', .98, 1.20, .05, .125)
     text_mesh('OLED_silkscreen_pin_names', 'VCC · GND · SCL · SDA', .48, 1.22, .05, .105)
-    text_mesh('OLED_silkscreen_interface', 'I2C / SPI', 1.87, -.78, .05, .09)
+    text_mesh('OLED_silkscreen_interface', 'JA + JB / 4-PIN', 1.58, -.78, .05, .09)
     return objects

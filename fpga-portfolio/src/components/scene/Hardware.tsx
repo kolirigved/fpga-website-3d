@@ -96,7 +96,7 @@ export default function Hardware({ onReady }: { onReady: (ready: boolean) => voi
       ctx.fillText(detail.slice(52, 104), 54, 340);
       ctx.fillStyle = '#55e9ad'; ctx.font = '600 22px ui-monospace, monospace';
       ctx.fillText(`MODULE ${modules.indexOf(s.module as typeof modules[number]) + 1 || 'HOME'}  ·  7-SEG ${text}`, 54, 476);
-      ctx.fillStyle = '#609078'; ctx.font = '20px ui-monospace, monospace'; ctx.fillText('JA / SPI LINK  ·  OLED 128 × 64', 54, 514);
+      ctx.fillStyle = '#609078'; ctx.font = '20px ui-monospace, monospace'; ctx.fillText('JA + JB / 4-PIN LINK  ·  OLED 128 × 64', 54, 514);
       board.oledTexture.needsUpdate = true;
       oledLast.current = oledKey;
     }

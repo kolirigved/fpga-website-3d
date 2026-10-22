@@ -46,6 +46,8 @@ metal = material('Nickel_connector_shell', (.53,.57,.59), .82, .29)
 solder = material('Tin_solder', (.48,.51,.48), .78, .38)
 gold = material('Gold_contacts', (.61,.43,.13), .78, .28)
 ceramic = material('MLCC_ceramic', (.43,.39,.29), .05, .76)
+resistor_mat = material('Thick_film_resistor', (.075,.061,.046), .02, .72)
+ferrite_mat = material('Ferrite_inductor', (.055,.065,.06), .08, .54)
 blue = material('Jumper_blue', (.018,.09,.39), .05, .47)
 red = material('Reset_red_rubber', (.34,.035,.021), 0, .64)
 lens = material('Seven_segment_diffuser_off', (.16,.18,.16), .05, .5)
@@ -177,6 +179,16 @@ def passive(px,py,orient=0):
     box('Passive_ceramic',px,py,w,h,.048,.165,ceramic)
     for sign in (-1,1): box('Passive_terminal',px+sign*(w/2-1.7) if not orient else px,py if not orient else py+sign*(h/2-1.7),3.4 if not orient else w,h if not orient else 3.4,.055,.163,solder)
 
+def resistor(px, py, orient=0):
+    w,h=(17,6) if orient==0 else (6,17)
+    box('Thick_film_resistor',px,py,w,h,.035,.165,resistor_mat)
+    for sign in (-1,1):
+        box('Resistor_terminal',px+sign*(w/2-1.5) if not orient else px,py if not orient else py+sign*(h/2-1.5),3 if not orient else w,h if not orient else 3,.045,.163,solder)
+
+def ferrite_inductor(name, px, py, w=34, h=30):
+    box(name,px,py,w,h,.13,.16,ferrite_mat,.025)
+    for dx in (-w/2+5,w/2-5): box(name+'_pad',px+dx,py,7,h-8,.03,.16,solder)
+
 # Populate photographed decoupling banks and regulator islands, not random blocks.
 for row in range(4):
     for col in range(10): passive(699+col*29,650+row*18,1 if col>4 else 0)
@@ -191,6 +203,36 @@ for name,x,y,w,h in [('USB_controller',278,508,32,46),('Ethernet_PHY',645,305,30
 box('Clock_oscillator',233,521,39,31,.12,.16,metal)
 cylinder('MEMS_microphone',262,951,.092,.08,.16,gold)
 cylinder('Microphone_port',262,951,.024,.005,.241,plastic)
+
+# Dense but purposeful support circuitry: switching regulators, termination
+# arrays, clock filtering and test access make the personalised board read as
+# a populated engineering prototype without obscuring the physical controls.
+for i in range(8):
+    resistor(469 + i*21, 464, 1)
+    resistor(469 + i*21, 534, 1)
+for i in range(6):
+    resistor(1040 + i*19, 492)
+    passive(1040 + i*19, 521, 1)
+for px,py in [(436,420),(499,420),(562,420),(436,575),(499,575),(562,575)]: passive(px,py,1)
+for name,px,py in [('VCCINT_Regulator',500,497),('VCCAUX_Regulator',1088,550),('VCCO_Regulator',1350,578)]:
+    box(name,px,py,54,46,.11,.16,icmat,.018)
+    for row in (-1,1):
+        for col in range(4): box(name+'_lead',px-21+col*14,py+row*27,7,5,.035,.16,solder)
+ferrite_inductor('VCCINT_Ferrite',428,498,38,34)
+ferrite_inductor('VCCAUX_Ferrite',1016,550,32,28)
+ferrite_inductor('VCCO_Ferrite',1274,578,32,28)
+for x,y in [(407,470),(407,494),(407,518),(592,470),(592,494),(592,518),(997,520),(997,544),(997,568),(1179,538),(1179,562),(1179,586),(1305,545),(1305,569),(1305,593)]: passive(x,y)
+for x,y in [(670,561),(690,561),(710,561),(930,561),(950,561),(970,561),(710,1080),(730,1080),(750,1080),(870,1080),(890,1080),(910,1080)]: resistor(x,y)
+box('QSPI_flash_aux',1204,484,46,36,.08,.16,icmat,.015)
+for side in (-1,1):
+    for pin in range(4): box('QSPI_aux_pin',1204+side*28,484-12+pin*8,6,4,.03,.16,solder)
+box('Clock_filter',1010,428,46,24,.085,.16,metal,.01)
+for i in range(6): passive(960+i*20,428,1)
+for group_x,group_y in [(635,620),(980,620),(650,1110),(970,1110)]:
+    for row in range(4):
+        for col in range(4): ring('Signal_via',group_x+col*11,group_y+row*11,.026,.013,.164,gold,12)
+for i in range(10):
+    ring('Debug_test_pad',725+i*22,1170,.052,.027,.166,gold,16)
 
 # Sixteen independent slide switches, labeled SW15 at left through SW0 at right.
 for column in range(16):
@@ -295,10 +337,13 @@ box('Micro_USB_JTAG',103,475,70,87,.23,.16,metal)
 box('Micro_USB_opening',65,475,3,63,.14,.205,plastic)
 box('MicroSD_underside',134,651,94,114,.13,-.13,metal)
 
-# Reference-style red OLED carrier, scaled up 25% so its live display reads
-# clearly beside the board. Keep the glass independently named for the site.
-oled_scale = 1.25
-oled_x, oled_y, oled_z = xy(1925,802.5)[0], 0, .22
+# Reference-style red OLED carrier. Its enlarged footprint spans the two
+# adjacent right-edge Pmod positions (JA and JB), while retaining only the
+# four interface contacts the OLED needs. Keep the glass independently named.
+oled_scale = 1.65
+ja_x, ja_y = xy(1533, 801)
+jb_x, jb_y = xy(1533, 1083)
+oled_x, oled_y, oled_z = ja_x + 2.24 * oled_scale, (ja_y + jb_y) / 2, .22
 oled_yaw = 0  # horizontal screen; its left-side FPC connector faces the FPGA
 oled_parts=create_oled_module(center=(oled_x,oled_y,oled_z),scale=oled_scale,facing=0,yaw=oled_yaw)
 screen=next(obj for obj in oled_parts if obj.name=='OLED_SCREEN')
@@ -313,8 +358,9 @@ def oled_wire(name,points,mat):
     obj=bpy.context.object;STATIC.append(obj)
 for index,wiremat in enumerate((red,blue,gold,ledlit)):
     endpoint_x=oled_x-2.24*oled_scale
-    endpoint_y=(-.72+index*.46)*oled_scale
-    oled_wire(f'OLED_SPI_wire_{index}',[(5.30,.36,.31),(5.72,.20,.31),(5.96,.04+index*.12,.31),(endpoint_x-.20,endpoint_y*.66,.31),(endpoint_x,endpoint_y,.31)],wiremat)
+    endpoint_y=oled_y + (-.30+index*.20)*oled_scale
+    port_y = ja_y if index < 2 else jb_y
+    oled_wire(f'OLED_4PIN_wire_{index}',[(ja_x+.42,port_y,.31),(ja_x+.76,port_y,.31),(endpoint_x-.32,endpoint_y,.31),(endpoint_x,endpoint_y,.31)],wiremat)
 
 # A compact 30 mm axial fan sits on the open left half of the board. Its
 # square frame, corner screws, swept blades, hub, and finger guards are
@@ -413,7 +459,7 @@ objects=[o for o in scene.objects if o.type=='MESH']
 bpy.ops.object.select_all(action='DESELECT')
 for o in objects:o.select_set(True)
 bpy.ops.export_scene.gltf(filepath=str(ASSETS/'nexys4-ddr.glb'),export_format='GLB',use_selection=True,export_apply=True,export_extras=True,export_yup=True,export_cameras=False,export_lights=False)
-manifest={'reference':'User-supplied Nexys 4 DDR front photograph','nominal_dimensions':[12.2,1315*S,.16],'units':'model units; nominal centimeters, not mechanical CAD','switches':[f'SW{i}_Slider' for i in range(16)],'buttons':[n+'_Plunger' for n,*_ in buttons],'leds':[f'LED{i}' for i in range(16)],'segments':[f'Digit{i}_Segment{s}' for i in range(8) for s in ['A','B','C','D','E','F','G','DP']],'power_switch':'SW16_Slider','oled':{'mesh':'OLED_SCREEN','interface':'JA Pmod SPI','scale':oled_scale,'yaw_radians':oled_yaw,'connector_edge':'faces FPGA','screen_dimensions_cm':[3.27*oled_scale,1.8*oled_scale],'carrier_dimensions_cm':[4.55*oled_scale,2.82*oled_scale],'standalone_asset':'public/models/oled-module.glb','position':'enlarged red carrier beside board with visible four-wire SPI lead'},'cooling_fan':{'rotor_node':'CoolingFan_Rotor_Hub','frame_nodes':[f'CoolingFan_Frame_{side}' for side in ('Left','Right','Top','Bottom')],'blade_nodes':[f'CoolingFan_Blade_{i}' for i in range(7)],'position':'left half of board'},'branding':'Personalized Rigved Koli silkscreen; vendor logos removed','mesh_count':len(objects),'glb_bytes':(ASSETS/'nexys4-ddr.glb').stat().st_size}
+manifest={'reference':'User-supplied Nexys 4 DDR front photograph','nominal_dimensions':[12.2,1315*S,.16],'units':'model units; nominal centimeters, not mechanical CAD','switches':[f'SW{i}_Slider' for i in range(16)],'buttons':[n+'_Plunger' for n,*_ in buttons],'leds':[f'LED{i}' for i in range(16)],'segments':[f'Digit{i}_Segment{s}' for i in range(8) for s in ['A','B','C','D','E','F','G','DP']],'power_switch':'SW16_Slider','oled':{'mesh':'OLED_SCREEN','interface':'JA + JB Pmod four-pin harness','scale':oled_scale,'yaw_radians':oled_yaw,'connector_edge':'left edge faces FPGA','connector_pins':['VCC','GND','SCL','SDA'],'screen_dimensions_cm':[3.27*oled_scale,1.8*oled_scale],'carrier_dimensions_cm':[4.55*oled_scale,2.82*oled_scale],'standalone_asset':'public/models/oled-module.glb','position':'enlarged horizontal red carrier spanning JA and JB with a four-wire left-edge harness'},'cooling_fan':{'rotor_node':'CoolingFan_Rotor_Hub','frame_nodes':[f'CoolingFan_Frame_{side}' for side in ('Left','Right','Top','Bottom')],'blade_nodes':[f'CoolingFan_Blade_{i}' for i in range(7)],'position':'left half of board'},'branding':'Personalized Rigved Koli silkscreen; vendor logos removed','mesh_count':len(objects),'glb_bytes':(ASSETS/'nexys4-ddr.glb').stat().st_size}
 (ASSETS/'nexys4-ddr.manifest.json').write_text(json.dumps(manifest,indent=2))
 for image in bpy.data.images:
     if image.source=='FILE':image.pack()

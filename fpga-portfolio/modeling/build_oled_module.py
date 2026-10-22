@@ -14,7 +14,7 @@ PREVIEW = ROOT / 'previews/oled-module.png'
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 PREVIEW.parent.mkdir(parents=True, exist_ok=True)
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
-parts = create_oled_module(scale=1.25)
+parts = create_oled_module(scale=1.65)
 scene = bpy.context.scene
 scene.render.engine = 'CYCLES'; scene.cycles.samples = 16; scene.cycles.use_denoising = True
 scene.render.resolution_x = 1200; scene.render.resolution_y = 850; scene.render.resolution_percentage = 100
