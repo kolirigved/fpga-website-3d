@@ -6,6 +6,7 @@ import Hardware from './Hardware';
 import CameraController from './CameraController';
 import ReflectingFloor from './ReflectingFloor';
 import AtmosphereParticles from './AtmosphereParticles';
+import BloomEffect from './BloomEffect';
 
 function Fallback({ onReady }: { onReady: (ready: boolean) => void }) {
   useEffect(() => onReady(false), [onReady]);
@@ -125,6 +126,7 @@ export default function Scene({ onReady }: { onReady: (ready: boolean) => void }
         </Suspense>
 
         <CameraController />
+        <BloomEffect />
       </Canvas>
     </Boundary>
   );

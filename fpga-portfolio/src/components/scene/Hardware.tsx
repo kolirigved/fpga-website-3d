@@ -59,7 +59,7 @@ export default function Hardware({ onReady }: { onReady: (ready: boolean) => voi
     const oledMaterial = new MeshBasicMaterial({ map: oledTexture, toneMapped: false });
     const controlMaterials: { name: string; material: MeshStandardMaterial }[] = [];
     const off = new MeshStandardMaterial({ color: '#41423b', roughness: .58 });
-    const on = new MeshStandardMaterial({ color: '#400c08', emissive: '#ff2012', emissiveIntensity: .75, roughness: .5, toneMapped: false });
+    const on = new MeshStandardMaterial({ color: '#400c08', emissive: '#ff2012', emissiveIntensity: 2.4, roughness: .5, toneMapped: false });
     scene.traverse(o => {
       const sw = o.name.match(/^SW(\d+)_Slider$/);
       if (sw) switches.push({ object: o, index: Number(sw[1]), rest: o.position.z, travel: Number(o.userData.travel ?? .38) });
@@ -140,7 +140,7 @@ export default function Hardware({ onReady }: { onReady: (ready: boolean) => voi
       const user = light.name.match(/^LED(\d+)$/);
       const enabled = s.powered && (user ? s.booting || s.switches[Number(user[1])] : light.name === 'POWER_LED' || light.name === 'DONE_LED' && !s.booting || light.name === 'RGB16' && s.module !== 'Home' || light.name === 'BUSY_LED' && s.activityUntil > now);
       light.material.color.set(enabled ? '#98b75f' : '#465035');
-      light.material.emissive.copy(green); light.material.emissiveIntensity = enabled ? .85 : 0;
+      light.material.emissive.copy(green); light.material.emissiveIntensity = enabled ? 1.8 : 0;
     }
     for (const entry of board.controlMaterials) {
       entry.material.emissive.set('#8eaaa2'); entry.material.emissiveIntensity = hovered.current === entry.name ? .12 : 0;

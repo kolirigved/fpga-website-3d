@@ -30,3 +30,9 @@ The OLED attaches to JA Pmod over a visual SPI lead. The web scene renders live 
 ## Accuracy limits
 
 This is a photograph-based visual reconstruction, not manufacturer mechanical CAD or a validated electrical layout. The silhouette and component positions follow the supplied reference. Thicknesses, unseen connector interiors, underside features, dense routing, and passive details are approximated. Texture traces and OLED wires are visual only, not an electrical netlist. The personalized silkscreen does not claim that the virtual board is an official manufacturer product.
+
+## Editing PCB text in Blender
+
+Open `modeling/nexys4-ddr.blend` and expand the `EDITABLE_SILKSCREEN_TEXT` collection in the Outliner. Select a named `EDIT_*` object, open **Object Data Properties** (the green text icon), and change its **Body** field. These source objects remain Blender `FONT` curves. The build script creates separate `_EXPORT` mesh copies because glTF cannot reliably preserve editable font objects.
+
+After changing text in Blender, duplicate the edited text, convert the duplicate with **Object → Convert → Mesh**, and use that mesh for export. To make the change reproducible on future builds, also update the matching `editable_pcb_text(...)` call in `modeling/build_nexys_realistic.py`. Smaller reference designators and connector labels remain in `modeling/textures/pcb-silkscreen.png`; change their `label(...)` calls in the script and rebuild the model.

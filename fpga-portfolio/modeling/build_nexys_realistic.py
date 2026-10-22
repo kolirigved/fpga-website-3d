@@ -126,9 +126,8 @@ for i in range(16):
     label(str(15-i),px,1248,14,bold=True)
     label(f'LD{15-i}',px,1272,9);label(f'SW{15-i}',px,1290,10)
     outline(px,1378,75,156)
-label('RIGVED KOLI',810,530,39,bold=True);label('FPGA WORKBENCH',810,574,21,bold=True)
-label('ELECTRICAL ENGINEERING',1247,734,19,bold=True);label('DIGITAL SYSTEMS / REV 01',1237,769,14,bold=True)
-label('PERSONAL HARDWARE LAB',1290,792,13,bold=True)
+# Personal branding is added below as editable Blender FONT objects. Mesh
+# duplicates are exported to glTF so the website does not depend on fonts.
 for text,x,y,size in [('USB HOST',530,350,18),('ETHERNET',803,425,20),('VGA',1250,341,20),('MONO',1416,314,18),('AUDIO OUT',1417,338,18),('POWER',342,329,17),('ON',408,188,17),('OFF',411,295,17),('USB  WALL',174,338,17),('5V ONLY',292,374,17),('PROG',117,539,15),('UART',117,562,15),('SD',111,611,17),('MICRO',123,638,17),('CPU RESET',1119,682,17),('PROG',1338,679,17),('DONE',1012,655,17),('JXADC',1456,625,15),('JA',1454,914,15),('JB',1456,1193,15),('JD',183,915,15),('JC',180,1191,15),('MIC',261,984,16),('BUSY',551,478,16),('MODE',1291,479,18),('QSPI   JTAG   USB/SD',1190,531,11),('TEMP',1486,1279,17),('SENSOR',1490,1307,16),('TMS TDI TDO TCK GND 3V3',1260,1192,11),('IC8',812,909,12),('IC16',813,1067,12),('BTNU (M18)',1228,887,14),('BTNL',1115,1021,14),('BTNC (N17)',1227,997,14),('BTNR',1339,1021,14),('BTND (P18)',1234,1109,14)]: label(text,x,y,size,bold=True)
 for px,py in [(505,735),(505,911),(505,1010)]:
     label('GND',px-38,py,12);label('VCC3V3',px-50,py+27,12)
@@ -154,6 +153,20 @@ for polygon in mesh.polygons:
     for li in polygon.loop_indices:
         co=mesh.vertices[mesh.loops[li].vertex_index].co
         uvs.data[li].uv=(co.x/12.2+.5,co.y/(1315*S)+.5)
+
+editable_silkscreen = bpy.data.collections.new('EDITABLE_SILKSCREEN_TEXT')
+bpy.context.scene.collection.children.link(editable_silkscreen)
+def editable_pcb_text(name, text, px, py, size):
+    curve=bpy.data.curves.new(name+'_FONT','FONT');curve.body=text;curve.size=size*S;curve.extrude=.001;curve.align_x='CENTER';curve.align_y='CENTER'
+    source=bpy.data.objects.new(name,curve);editable_silkscreen.objects.link(source);x,y=xy(px,py);source.location=(x,y,.171);source.data.materials.append(white);source.hide_render=True
+    export=source.copy();export.data=source.data.copy();bpy.context.collection.objects.link(export);export.name=name+'_EXPORT'
+    bpy.ops.object.select_all(action='DESELECT');export.select_set(True);bpy.context.view_layer.objects.active=export;bpy.ops.object.convert(target='MESH');STATIC.append(bpy.context.object)
+    return source
+editable_pcb_text('EDIT_Rigved_Koli','RIGVED KOLI',810,530,39)
+editable_pcb_text('EDIT_FPGA_Workbench','FPGA WORKBENCH',810,574,21)
+editable_pcb_text('EDIT_EE_Student','EE STUDENT AT IIT KANPUR',1247,734,19)
+editable_pcb_text('EDIT_Revision','DIGITAL SYSTEMS / REV 01',1237,769,14)
+editable_pcb_text('EDIT_Hardware_Lab','PERSONAL HARDWARE LAB',1290,792,13)
 
 def top_text(name,lines,px,py,w,h,base,bg=(25,29,30),ink=(130,140,132),font_size=39):
     img=Image.new('RGB',(512,512),bg);d=ImageDraw.Draw(img)
