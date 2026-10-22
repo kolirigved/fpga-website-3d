@@ -1,6 +1,6 @@
 # Nexys 4 DDR reconstruction
 
-Primary visual reference: the front photograph supplied in this conversation (1634 × 1504 displayed pixels). `build_nexys.py` records component placements in that photograph's pixel coordinates. The photograph is not bundled or used as a fake board surface: the script builds real component geometry and draws a separate PCB marking/routing texture.
+Primary visual reference: the front photograph supplied in this conversation (1634 × 1504 displayed pixels). `build_nexys_realistic.py` records component placements in that photograph's pixel coordinates. The photograph is not bundled or used as a fake board surface: the script builds real component geometry and draws a separate PCB marking/routing texture. Routing density, via fields, plated contacts, solder, package details, and the personalized markings are procedural approximations.
 
 Secondary factual reference: [Digilent Nexys4 DDR reference manual, revision C](https://digilent.com/reference/_media/nexys4-ddr/nexys4ddr_rm.pdf). Used to confirm the Artix-7 BGA, DDR2 memory, switch/button counts, two four-digit displays, Pmod headers, and connector identities. No additional photographic views were used.
 
@@ -9,11 +9,12 @@ Secondary factual reference: [Digilent Nexys4 DDR reference manual, revision C](
 ```sh
 python3.11 -m venv .blender-venv
 .blender-venv/bin/python -m pip install bpy==4.2.13 Pillow
-.blender-venv/bin/python -u modeling/build_nexys.py
+.blender-venv/bin/python -u modeling/build_oled_module.py
+.blender-venv/bin/python -u modeling/build_nexys_realistic.py
 .blender-venv/bin/python modeling/validate_glb.py
 ```
 
-This runs Blender's official Python module without requiring the Blender GUI. It saves a `.blend` with packed textures, a self-contained GLB, a node manifest, a top render, a studio render, and an illuminated segment closeup. The script currently uses macOS Arial font paths; change `fontfile` and `boldfile` for another operating system.
+Build the reusable OLED carrier on its own with `build_oled_module.py`; it writes `public/models/oled-module.glb`, `modeling/oled-module.blend`, and the detailed `previews/oled-module.png`. The full board builder uses the same helper geometry to mount an enlarged (125%) version beside JA, with its connector edge aimed toward the FPGA. It writes the board `.blend`, self-contained GLB, node manifest, top and studio renders, and an illuminated segment closeup. The red OLED carrier follows the supplied display-module reference, with four plated mounting holes, a raised bezel and glass, FPC contacts, and individually modeled small components. Its active area remains a separately addressable `OLED_SCREEN` mesh. A compact 30 mm square axial cooling fan sits on the board's left half; its four frame rails, seven swept blades, and central rotor retain separate node names. The website spins the rotor while board power is on and stops it when power is off.
 
 ## Control contract
 
@@ -24,8 +25,8 @@ This runs Blender's official Python module without requiring the Blender GUI. It
 - Static, noninteractive parts are grouped by material to reduce draw calls. The board is not one merged mesh. Some slider objects contain multiple material primitives under the named transform.
 - glTF converts Blender's component-facing +Z into Three.js +Y. Switches move toward negative Three.js Z when ON. Buttons depress along negative Y.
 
-The manifest reserves JA Pmod as a future serial display attachment point. No external display geometry is included.
+The OLED attaches to JA Pmod over a visual SPI lead. The web scene renders live portfolio text on the OLED surface and focuses the camera on it when clicked.
 
 ## Accuracy limits
 
-This is a photograph-based visual reconstruction, not manufacturer mechanical CAD or a validated electrical layout. The silhouette, front component positions, markings, and proportions follow the supplied reference. Thicknesses, unseen connector interiors, underside features, and small routing/passive details are approximated. Texture traces are visual reference-style routing, not an electrical netlist. Digilent/Xilinx markings identify the reproduced product; this is not an official model.
+This is a photograph-based visual reconstruction, not manufacturer mechanical CAD or a validated electrical layout. The silhouette and component positions follow the supplied reference. Thicknesses, unseen connector interiors, underside features, dense routing, and passive details are approximated. Texture traces and OLED wires are visual only, not an electrical netlist. The personalized silkscreen does not claim that the virtual board is an official manufacturer product.

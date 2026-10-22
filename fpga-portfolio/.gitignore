@@ -6,3 +6,4 @@ test-results/
 playwright-report/
 .blender-venv/
 *.blend1
+*.DS_Store

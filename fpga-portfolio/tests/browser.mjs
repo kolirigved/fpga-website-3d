@@ -40,6 +40,24 @@ try {
   await page.getByRole('switch',{name:'SW4 Skills',exact:true}).click();
   assert.match(await page.locator('.scene-status').textContent(),/SKILLS/);
   await page.getByRole('button',{name:'Close controls',exact:true}).click();
+  await page.setViewportSize({width:1440,height:1000});
+  await page.locator('[data-camera="BOARD_OVERVIEW"][data-moving="false"]').waitFor();
+  await page.waitForTimeout(250);
+  let oledHit=null;
+  for (const y of [570,600,630,660,690,720]) {
+    for (const x of [940,980,1020,1060,1100,1140,1180]) {
+      await page.mouse.move(x,y); await page.waitForTimeout(90);
+      if (await page.locator('.hover-label').textContent()==='Portfolio OLED · click to focus') { oledHit={x,y}; break; }
+    }
+    if (oledHit) break;
+  }
+  assert.ok(oledHit,'OLED screen should be hoverable in overview');
+  assert.equal(await page.locator('.hover-label').textContent(),'Portfolio OLED · click to focus');
+  await page.mouse.click(oledHit.x,oledHit.y);
+  await page.locator('[data-camera="DISPLAY_FOCUS"][data-moving="false"]').waitFor();
+  await page.screenshot({path:'previews/website-oled-focus.png'});
+  await page.keyboard.press('Escape');
+  await page.locator('[data-camera="BOARD_OVERVIEW"][data-moving="false"]').waitFor();
   assert.deepEqual(errors,[]);
-  console.log('PASS: no scrolling or reader modal, module/item/register control, power, camera focus/return, reset, mobile, reduced motion; no JS errors.');
+  console.log('PASS: no scrolling or reader modal, module/item/register control, power, camera focus/return, OLED focus/return, reset, mobile, reduced motion; no JS errors.');
 } catch(error) {console.log(await page.locator('body').innerText());await page.screenshot({path:'previews/browser-failure.png'});throw error;} finally {await browser.close();}

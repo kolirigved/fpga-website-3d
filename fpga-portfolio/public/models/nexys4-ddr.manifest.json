@@ -118,7 +118,43 @@
     "Digit7_SegmentDP"
   ],
   "power_switch": "SW16_Slider",
-  "future_display_interface": "JA Pmod SPI: separate future display adapter; no external display in current scene",
-  "mesh_count": 123,
-  "glb_bytes": 1950196
+  "oled": {
+    "mesh": "OLED_SCREEN",
+    "interface": "JA Pmod SPI",
+    "scale": 1.25,
+    "yaw_radians": 0,
+    "connector_edge": "faces FPGA",
+    "screen_dimensions_cm": [
+      4.0875,
+      2.25
+    ],
+    "carrier_dimensions_cm": [
+      5.6875,
+      3.525
+    ],
+    "standalone_asset": "public/models/oled-module.glb",
+    "position": "enlarged red carrier beside board with visible four-wire SPI lead"
+  },
+  "cooling_fan": {
+    "rotor_node": "CoolingFan_Rotor_Hub",
+    "frame_nodes": [
+      "CoolingFan_Frame_Left",
+      "CoolingFan_Frame_Right",
+      "CoolingFan_Frame_Top",
+      "CoolingFan_Frame_Bottom"
+    ],
+    "blade_nodes": [
+      "CoolingFan_Blade_0",
+      "CoolingFan_Blade_1",
+      "CoolingFan_Blade_2",
+      "CoolingFan_Blade_3",
+      "CoolingFan_Blade_4",
+      "CoolingFan_Blade_5",
+      "CoolingFan_Blade_6"
+    ],
+    "position": "left half of board"
+  },
+  "branding": "Personalized Rigved Koli silkscreen; vendor logos removed",
+  "mesh_count": 155,
+  "glb_bytes": 3100232
 }

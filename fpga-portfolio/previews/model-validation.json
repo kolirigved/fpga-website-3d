@@ -1,13 +1,24 @@
 {
   "file": "public/models/nexys4-ddr.glb",
-  "bytes": 1950196,
-  "triangles": 49920,
-  "meshes": 123,
-  "materials": 14,
+  "bytes": 3100232,
+  "triangles": 75988,
+  "meshes": 155,
+  "materials": 25,
   "independent_switches": 16,
   "independent_buttons": 7,
   "independent_user_leds": 16,
   "independent_segments_including_decimal_points": 64,
-  "embedded_images": 3,
-  "all_control_names_verified": true
+  "oled_screen_mesh": "OLED_SCREEN",
+  "oled_scale": 1.25,
+  "cooling_fan_frame_nodes": 4,
+  "cooling_fan_blade_nodes": 7,
+  "embedded_images": 4,
+  "all_control_names_verified": true,
+  "standalone_oled": {
+    "file": "public/models/oled-module.glb",
+    "bytes": 488760,
+    "separate_mount_holes": 4,
+    "screen_node": "OLED_SCREEN",
+    "component_nodes": 58
+  }
 }

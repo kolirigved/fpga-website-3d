@@ -3,12 +3,13 @@ import { modules, projects, summary, type Module } from '../data/portfolio';
 
 export type CameraState = 'BOARD_OVERVIEW' | 'BOARD_CLOSEUP' | 'BOARD_TOP' | 'DISPLAY_FOCUS';
 export type BoardButton = 'BTNU' | 'BTND' | 'BTNL' | 'BTNR' | 'BTNC' | 'CPU_RESET' | 'PROG';
-export type DisplayAttachment = { position: [number, number, number]; normal: [number, number, number]; width: number; height: number };
+export type DisplayAttachment = { position: [number, number, number]; normal: [number, number, number]; up?: [number, number, number]; width: number; height: number };
 type State = {
   module: Module; item: number; switches: boolean[]; powered: boolean;
   camera: CameraState; returnCamera: CameraState; transitioning: boolean;
   booting: boolean; reducedMotion: boolean; tooltip: string; pressed: Partial<Record<BoardButton, number>>;
   activityUntil: number; display: DisplayAttachment | null;
+  zoomTrigger: number; zoomIn: () => void; zoomOut: () => void;
   select: (module: Module) => void; toggleSwitch: (index: number) => void;
   step: (delta: number) => void; cycleModule: (delta: number) => void;
   press: (button: BoardButton) => void; power: () => void;
@@ -20,6 +21,9 @@ export const useBoard = create<State>((set, get) => ({
   module: 'Home', item: 0, switches: Array(16).fill(false), powered: true,
   camera: 'BOARD_OVERVIEW', returnCamera: 'BOARD_OVERVIEW', transitioning: false,
   booting: false, reducedMotion: false, tooltip: '', pressed: {}, activityUntil: 0, display: null,
+  zoomTrigger: 0,
+  zoomIn: () => set(s => ({ zoomTrigger: s.zoomTrigger + 1 })),
+  zoomOut: () => set(s => ({ zoomTrigger: s.zoomTrigger - 1 })),
   select: module => {
     const switches = [...get().switches];
     for (let i = 0; i < 8; i++) switches[i] = modules[i] === module;
@@ -51,7 +55,7 @@ export const useBoard = create<State>((set, get) => ({
   },
   back: () => {
     const s = get();
-    if (s.camera !== 'BOARD_OVERVIEW') set({ camera: 'BOARD_OVERVIEW', transitioning: true, tooltip: '' });
+    if (s.camera !== 'BOARD_OVERVIEW') set({ camera: s.camera === 'DISPLAY_FOCUS' ? s.returnCamera : 'BOARD_OVERVIEW', transitioning: true, tooltip: '' });
   },
   reset: () => set({ module: 'Home', item: 0, switches: Array(16).fill(false), booting: true, activityUntil: Date.now() + 650 }),
   finishBoot: () => set({ booting: false }), settle: () => set({ transitioning: false }),
